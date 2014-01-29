@@ -227,18 +227,21 @@ class OwnerInstanceMySQLDAO extends PDODAO implements OwnerInstanceDAO {
         return ($insert_count > 0) ? true : false;
     }
 
-    public function setAuthError($owner_id, $instance_id, $auth_error="") {
+    public function setAuthErrorByTokens($instance_id, $oauth_access_token, $oauth_access_token_secret,
+        $auth_error="") {
         $q = "UPDATE  #prefix#owner_instances SET auth_error=:auth_error ";
-        $q .= "WHERE owner_id = :owner_id AND instance_id = :instance_id";
+        $q .= "WHERE instance_id = :instance_id AND oauth_access_token = :oauth_access_token ";
+        $q .= "AND oauth_access_token_secret = :oauth_access_token_secret ";
         $vars = array(
-            ':owner_id' => $owner_id,
             ':instance_id' => $instance_id,
+            ':oauth_access_token_secret' => $oauth_access_token_secret,
+            ':oauth_access_token' => $oauth_access_token,
             ':auth_error' => $auth_error
         );
         if ($this->profiler_enabled) { Profiler::setDAOMethod(__METHOD__); }
         $stmt = $this->execute($q, $vars);
         $insert_count = $this->getInsertCount($stmt);
-        return ($insert_count > 0) ? true : false;
+        return ($insert_count > 0);
     }
 
     public function getOAuthTokens($id) {

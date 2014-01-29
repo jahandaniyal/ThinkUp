@@ -88,9 +88,12 @@ class FacebookPlugin extends Plugin implements CrawlerPlugin, DashboardPlugin, P
             try {
                 $facebook_crawler->fetchPostsAndReplies();
             } catch (APIOAuthException $e) {
+                //@TODO If this is the admin user, the non-admin user who authed this FB account doesn't get the email
                 //The access token is invalid, save in owner_instances table
-                $owner_instance_dao->setAuthError($current_owner->id, $instance->id, $e->getMessage());
+                //@TODO This should be done by auth token, not owner/instance
+                $owner_instance_dao->setAuthErrorByTokens($instance->id, $access_token, '', $e->getMessage());
                 //Send email alert
+                //@TODO Get owner by auth tokens first, then send to that person
                 $this->sendInvalidOAuthEmailAlert($current_owner->email, $instance->network_username);
                 $logger->logUserError('EXCEPTION: '.$e->getMessage(), __METHOD__.','.__LINE__);
             } catch (Exception $e) {
